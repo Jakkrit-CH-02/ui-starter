@@ -1,31 +1,18 @@
-
-export type Menu = {
-   name: string
-   text: string
-   icon?: string
-   path: string
-   breadcrumbs: string[]
-   breadcrumbLinks: string[]
-   active: boolean
-}
+import type { SvgIconComponent } from "@mui/icons-material";
 
 export type MenuType = {
-   name: string
-   pathName: string
-   text: string
-   icon: any // TODO: Fix type to be more specific for MUI icons
-   subMenus: MenuType[]
-   isCollapse?: boolean
-   // roles?: Role[]
-   // permissions?: PermissiosAction[]
-}
+  /** i18n key suffix: `sidebar.<name>` */
+  name: string;
+  pathName: string;
+  /** Fallback label when no translation exists */
+  text: string;
+  icon: SvgIconComponent;
+};
 
 export type MenuGroupType = {
-   groupName: string
-   name: string
-   my?: number
-   mb?: number
-   menuList: MenuType[]
-   // roles: Role[]
-   // permissions: PermissionAction[]
-}
+  /** i18n key suffix: `sidebar.<name>` */
+  name: string;
+  /** Fallback label when no translation exists */
+  groupName: string;
+  menuList: MenuType[];
+};

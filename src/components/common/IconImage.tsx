@@ -1,22 +1,11 @@
-import { type FC } from "react";
-import styled from "@emotion/styled";
-
 type Props = {
-   path: string
-   size?: number
-   color?: string
-}
+  path: string;
+  /** Width and height in px */
+  size?: number;
+  /** Leave empty for decorative images */
+  alt?: string;
+};
 
-const IconStyle = styled("img")((props: {
-   size: number
-   color: string
-}) => ({
-   height: props.size,
-   width: props.size,
-   color: props.color,
-   fill: props.color
-}))
-
-export const IconImage: FC<Props> = ({ path, size, color}) => {
-   return <IconStyle src={path} size={size ?? 18} color={color ?? ""} />
-}
+export const IconImage = ({ path, size = 18, alt = "" }: Props) => (
+  <img src={path} width={size} height={size} alt={alt} style={{ display: "block" }} />
+);

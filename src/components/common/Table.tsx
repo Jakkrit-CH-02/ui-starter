@@ -1,10 +1,7 @@
-import { memo, useMemo } from "react";
-import { Column, DataType } from "../../lib/@types";
-import { ActionTable, Colors, statusOptions } from "../../lib/constants";
-// import lng from "../../locales/en/translation.json";
 import {
   Box,
   Paper,
+  Skeleton,
   Table as MuiTable,
   TableBody,
   TableCell,
@@ -12,234 +9,169 @@ import {
   TableHead,
   TableRow,
   Typography,
-  IconButton,
 } from "@mui/material";
-import FiberManualRecordIcon from "@mui/icons-material/FiberManualRecord";
-import { PrimaryButton } from "./PrimaryButton";
+import { useMemo, type ReactNode } from "react";
+import { useTranslation } from "react-i18next";
+import { DataType, type Column } from "../../lib/@types";
+import type { ActionTable } from "../../lib/constants";
+import { EmptyState } from "./EmptyState";
 import { OutlineButton } from "./OutlineButton";
-import VisibilityIcon from "@mui/icons-material/Visibility";
-import ModeEditIcon from "@mui/icons-material/ModeEdit";
-import DeleteIcon from "@mui/icons-material/Delete";
 import { Pagination } from "./Pagination";
+import { StatusChip } from "./StatusChip";
+import { TableActions } from "./TableActions";
 
-type Props<T> = {
-  headerColor?: string;
+const SKELETON_ROWS = 5;
+const NUMBER_COLUMN_ID = "__no";
+const EMPTY_VALUE = "–";
+// First and last cells line up with the card's 24px inner edge.
+const edgePadding = { "&:first-of-type": { pl: 3 }, "&:last-of-type": { pr: 3 } };
+
+type Props<T extends object> = {
   columns: Column[];
   rows: T[];
+  /** Unique key of a row. Defaults to `row.id`, then the row index. */
+  getRowId?: (row: T, index: number) => string | number;
+  /** Adds a running number as the first column */
+  numbered?: boolean;
+  loading?: boolean;
+  /** Shows the error state instead of rows */
+  error?: boolean;
+  onRetry?: () => void;
+  emptyTitle?: string;
+  emptyDescription?: string;
+  /** Pagination is shown when `total` is greater than 0 */
   offset?: number;
   limit?: number;
   total?: number;
-  onClickAction?: (data: T, action: ActionTable, index: number) => void;
   onPagination?: (page: number) => void;
-  numbered?: boolean;
+  onClickAction?: (row: T, action: ActionTable, index: number) => void;
 };
 
-export const Table = <T,>({
-  headerColor,
+export const Table = <T extends object>({
   columns,
   rows,
-  offset,
-  limit,
-  total,
-  onClickAction,
-  onPagination,
+  getRowId,
   numbered,
+  loading,
+  error,
+  onRetry,
+  emptyTitle,
+  emptyDescription,
+  offset = 0,
+  limit = 10,
+  total = 0,
+  onPagination,
+  onClickAction,
 }: Props<T>) => {
+  const { t } = useTranslation();
 
-  const getData = (
-    data: any,
-    type: DataType,
-    index: number,
-    column: Column
-  ) => {
-    switch (type) {
-      case DataType.Text: {
-        const truncateStyle = column.truncate
-          ? {
-              noWrap: true,
-              style: { width: `calc(${column.minWidth}px - 3rem)` },
-            }
-          : {};
-        return (
-          <Typography variant="subtitle2" {...truncateStyle}>
-            {data}
-          </Typography>
-        );
-      }
+  const tableColumns = useMemo<Column[]>(
+    () =>
+      numbered
+        ? [{ id: NUMBER_COLUMN_ID, label: t("table.number"), dataType: DataType.Text, minWidth: 56 }, ...columns]
+        : columns,
+    [numbered, columns, t]
+  );
 
-      case DataType.Status: {
-        return (
-          <Box display="flex" alignItems="center">
-            <FiberManualRecordIcon
-              sx={{
-                fontSize: 18,
-                color: statusOptions.find((s) => s.title === data)?.bdColor,
-              }}
-            />
-            <Typography ml={1} variant="subtitle2">
-              {data}
-            </Typography>
-          </Box>
-        );
-      }
+  const rowId = (row: T, index: number) => {
+    if (getRowId) return getRowId(row, index);
+    const id = (row as { id?: unknown }).id;
+    return typeof id === "string" || typeof id === "number" ? id : index;
+  };
 
+  const renderCell = (row: T, index: number, column: Column): ReactNode => {
+    if (column.id === NUMBER_COLUMN_ID) return offset + index + 1;
+
+    const value = (row as Record<string, unknown>)[column.id];
+    if (value === null || value === undefined || value === "") return EMPTY_VALUE;
+
+    switch (column.dataType) {
+      case DataType.Status:
+        return <StatusChip status={String(value)} />;
       case DataType.Component:
-        return data;
+        return value as ReactNode;
       case DataType.Action:
-        return (data as ActionTable[])?.map((action) => {
-          const wrapper = (comp: React.ReactNode, action: ActionTable) => (
-            <IconButton
-              key={`icon_${action}`}
-              onClick={() => {
-                onClickAction?.(rows[index], action, index);
-              }}
-            >
-              {comp}
-            </IconButton>
-          );
-
-          const wrapperButtonPrimary = (title: string, action: ActionTable) => (
-            <PrimaryButton
-              dataCy={`${action}`}
-              color="error"
-              size="small"
-              onClick={() => {
-                onClickAction?.(rows[index], action, index);
-              }}
-            >
-              {title}
-            </PrimaryButton>
-          );
-
-          const wrapperButtonOutline = (title: string, action: ActionTable) => (
-            <OutlineButton
-              color="primary"
-              onClick={() => {
-                onClickAction?.(rows[index], action, index);
-              }}
-              sx={{ height: 25, color: "rgba(0, 0, 0, 0.87)" }}
-              dataCy="review-button-table"
-            >
-              {title}
-            </OutlineButton>
-          );
-
-          switch (action) {
-            case ActionTable.VIEW:
-              return wrapper(<VisibilityIcon sx={{ fontSize: 18 }} />, action);
-            case ActionTable.EDIT:
-              return wrapper(<ModeEditIcon sx={{ fontSize: 18 }} />, action);
-            case ActionTable.DELETE:
-              return wrapper(<DeleteIcon sx={{ fontSize: 18 }} />, action);
-            case ActionTable.BUTTON_DELETE:
-              return wrapperButtonPrimary("Remove", action);
-            case ActionTable.REVIEW:
-              return wrapperButtonOutline("Review", action);
-            default:
-              return null;
-          }
-        });
-      default:
-        return data;
+        return (
+          <TableActions
+            actions={value as ActionTable[]}
+            onAction={(action) => onClickAction?.(row, action, index)}
+          />
+        );
+      case DataType.Text:
+      default: {
+        const text = typeof value === "number" && column.format ? column.format(value) : String(value);
+        return column.truncate && column.minWidth ? (
+          <Typography variant="body2" noWrap title={text} sx={{ maxWidth: column.minWidth }}>
+            {text}
+          </Typography>
+        ) : (
+          text
+        );
+      }
     }
   };
 
-  const tableColumns = useMemo(() => {
-    return numbered
-      ? [
-          {
-            id: "no",
-            label: "Number",
-            dataType: DataType.Text,
-            minWidth: 60,
-            enablePinning: true,
-            pinningSide: "left",
-          } as Column,
-          ...columns,
-        ]
-      : columns;
-  }, [numbered, columns]);
-
-  const rowTable = useMemo<T[]>(() => {
-    return numbered
-      ? (rows.map((row, index) => ({
-          no: index + 1 + (offset ?? 0),
-          ...(row as object),
-        })) as (T & { no?: number })[])
-      : rows;
-  }, [numbered, offset, rows]);
+  const showRows = !loading && !error && rows.length > 0;
 
   return (
-    <Paper
-      elevation={3}
-      sx={{
-        borderRadius: 2,
-        width: "100%",
-        minWidth: "auto",
-        overflow: "hidden",
-      }}
-    >
-      <TableContainer sx={{ backgroundColor: "white" }}>
-        <MuiTable stickyHeader>
+    <Paper variant="outlined" sx={(theme) => ({ borderRadius: `${theme.tokens.radius.lg}px`, overflow: "hidden" })}>
+      <TableContainer>
+        <MuiTable aria-busy={loading}>
           <TableHead>
             <TableRow>
               {tableColumns.map((column) => (
-                <TableCell
-                  key={column.id}
-                  width={column.minWidth}
-                  align={column.align}
-                  style={{
-                    minWidth: column.minWidth,
-                    backgroundColor: headerColor ?? Colors.headTable,
-                    color: "#ffffff",
-                  }}
-                  sortDirection="desc"
-                >
+                <TableCell key={column.id} align={column.align} sx={{ minWidth: column.minWidth, ...edgePadding }}>
                   {column.label}
                 </TableCell>
               ))}
             </TableRow>
           </TableHead>
           <TableBody>
-            {rowTable.map((row, indexRow) => {
-              const rowKey = (row as any).id ?? indexRow;
-              return (
-                <TableRow key={rowKey} hover>
+            {loading &&
+              Array.from({ length: SKELETON_ROWS }, (_, i) => (
+                <TableRow key={i}>
                   {tableColumns.map((column) => (
-                    <TableCell key={rowKey}>
-                      {getData(
-                        (row as { [k: string]: string })[column.id],
-                        column.dataType,
-                        indexRow,
-                        column
-                      )}
+                    <TableCell key={column.id} sx={edgePadding}>
+                      <Skeleton variant="text" width="70%" />
                     </TableCell>
                   ))}
                 </TableRow>
-              );
-            })}
+              ))}
+            {showRows &&
+              rows.map((row, index) => (
+                <TableRow key={rowId(row, index)} hover sx={{ "&:last-child td": { borderBottom: 0 } }}>
+                  {tableColumns.map((column) => (
+                    <TableCell key={column.id} align={column.align} sx={edgePadding}>
+                      {renderCell(row, index, column)}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))}
           </TableBody>
         </MuiTable>
       </TableContainer>
-      {!!total && total !== 0 && (
-        <Box
-          sx={{
-            bgcolor: "#ffffff",
-            padding: "16px 16px",
-            borderRadius: "0 0 5px 5px",
-          }}
-        >
-          <Pagination
-            offset={offset || 0}
-            limit={limit || 10}
-            total={total || 10}
-            onPagination={onPagination}
-          />
+
+      {!loading && error && (
+        <EmptyState
+          isError
+          title={t("table.errorTitle")}
+          description={t("table.errorDescription")}
+          action={onRetry && <OutlineButton onClick={onRetry}>{t("common.tryAgain")}</OutlineButton>}
+        />
+      )}
+      {!loading && !error && rows.length === 0 && (
+        <EmptyState
+          title={emptyTitle ?? t("table.emptyTitle")}
+          description={emptyDescription ?? t("table.emptyDescription")}
+        />
+      )}
+      {showRows && total > 0 && (
+        <Box px={3} py={1.5} borderTop={1} borderColor="divider">
+          <Pagination offset={offset} limit={limit} total={total} onPagination={onPagination} />
         </Box>
       )}
     </Paper>
   );
 };
 
-const MemoizedTable = memo(Table);
-export default MemoizedTable;
+export default Table;

@@ -1,50 +1,25 @@
-import type { MenuGroupType } from "../@types/MenuType";
-import PersonalVideoRoundedIcon from '@mui/icons-material/PersonalVideoRounded';
-import EqualizerRoundedIcon from '@mui/icons-material/EqualizerRounded';
-import HomeWorkRoundedIcon from '@mui/icons-material/HomeWorkRounded';
-import TopicRoundedIcon from '@mui/icons-material/TopicRounded';
+import EqualizerRoundedIcon from "@mui/icons-material/EqualizerRounded";
+import SpaceDashboardRoundedIcon from "@mui/icons-material/SpaceDashboardRounded";
+import type { MenuGroupType } from "../@types";
 
+/** Sidebar menu. Each path needs a matching route in src/routes/router.tsx. */
 export const MenuGroups: MenuGroupType[] = [
-   {
-      groupName: "Dashboard",
-      name: "dashboard",
-      mb: 2,
-      menuList: [
-         {
-            name: "overview",
-            pathName: "/dashboard/overview",
-            text: "Overview",
-            icon: PersonalVideoRoundedIcon,
-            subMenus: [],
-         },
-         {
-            name: "analytics",
-            pathName: "/dashboard/analytics",
-            text: "Analytics",
-            icon: EqualizerRoundedIcon,
-            subMenus: [],
-         },
-      ]
-   },
-   // {
-   //    groupName: "Management",
-   //    name: "management",
-   //    mb: 2,
-   //    menuList: [
-   //       {
-   //          name: "",
-   //          pathName: "/",
-   //          text: "",
-   //          icon: null,
-   //          subMenus: [],
-   //       },
-   //       {
-   //          name: "",
-   //          pathName: "/",
-   //          text: "",
-   //          icon: null,
-   //          subMenus: [],
-   //       },
-   //    ]
-   // },
-]
+  {
+    name: "dashboard",
+    groupName: "Dashboard",
+    menuList: [
+      {
+        name: "overview",
+        pathName: "/dashboard/overview",
+        text: "Overview",
+        icon: SpaceDashboardRoundedIcon,
+      },
+      {
+        name: "analytics",
+        pathName: "/dashboard/analytics",
+        text: "Analytics",
+        icon: EqualizerRoundedIcon,
+      },
+    ],
+  },
+];

@@ -1,78 +1,38 @@
-import {
-  styled,
-  Box,
-  // Avatar as MuiAvatar,
-  Pagination as PaginationMUI,
-  Stack, TableRow as MuiTableRow, Typography
-} from "@mui/material";
-import { Colors } from "../../lib/constants";
+import { Box, Pagination as MuiPagination, Typography } from "@mui/material";
+import { useTranslation } from "react-i18next";
+import { getPageRange } from "../../lib/utils/pagination";
 
-export const TableRow = styled(MuiTableRow)`
-    &:hover {
-      background-color: ${Colors.rowHover};
-    }
-  `;
+type Props = {
+  /** Index of the first item on the current page (0-based) */
+  offset?: number;
+  /** Items per page */
+  limit?: number;
+  total?: number;
+  /** Called with the new page number (1-based) */
+  onPagination?: (page: number) => void;
+};
 
-export const getIndexPage = ({ offset, limit, total }: {
-  offset: number
-  limit: number
-  total: number
-}) => {
-  const to = offset + limit
-  if (!total) {
-    return {
-      start: 0,
-      end: 0,
-      overall: 0
-    }
-  }
-  return {
-    start: total === 0 ? 0 : offset / limit * limit + 1,
-    end: to <= total ? to : total,
-    overall: total
-  }
-}
-
-export type Props = {
-  offset?: number
-  limit?: number
-  total?: number
-  list?: number[]
-  page?: number
-  onPagination?: (value: any) => void
-  showOnlyPaging?: boolean
-}
-
-export const Pagination = ({
-  list = [10, 15, 30],
-  offset = 0,
-  limit = list[0],
-  total = 0,
-  onPagination,
-}: Props) => {
-  const { start, end, overall } = getIndexPage({ offset, limit, total })
-  const count = Math.ceil(overall / limit)
-  const page = (offset / limit) + 1
+export const Pagination = ({ offset = 0, limit = 10, total = 0, onPagination }: Props) => {
+  const { t } = useTranslation();
+  const { start, end } = getPageRange({ offset, limit, total });
+  const count = Math.max(1, Math.ceil(total / limit));
+  const page = Math.floor(offset / limit) + 1;
 
   return (
-    <Box
-      display="flex"
-      alignItems="center"
-      justifyContent="space-between"
-    >
-      <Typography variant="body2" color={Colors.caption}>
-        Showing {start} to {end} of {overall} entries
+    <Box display="flex" flexWrap="wrap" alignItems="center" justifyContent="space-between" gap={1.5}>
+      <Typography variant="body2" color="text.secondary" sx={{ fontVariantNumeric: "tabular-nums" }}>
+        {t("table.showing", { start, end, total })}
       </Typography>
-      <Stack spacing={2}>
-        <PaginationMUI
-          count={count}
-          page={page}
-          color="primary"
-          variant="outlined"
-          shape="rounded"
-          onChange={(_e, value) => page !== value && onPagination?.(value)}
-        />
-      </Stack>
+      <MuiPagination
+        count={count}
+        page={page}
+        color="primary"
+        variant="outlined"
+        shape="rounded"
+        onChange={(_e, value) => {
+          if (value !== page) onPagination?.(value);
+        }}
+      />
     </Box>
-  )
-}
+  );
+};

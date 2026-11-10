@@ -1,56 +1,22 @@
-import { Button as MuiButton, type SxProps, type Theme } from '@mui/material'
-import { memo, type PropsWithChildren, type ReactNode, useCallback} from 'react'
-
+import { Button as MuiButton, type SxProps, type Theme } from "@mui/material";
+import { memo, type MouseEvent, type PropsWithChildren, type ReactNode } from "react";
+import type { ButtonColor } from "../contexts/ModalContext";
 
 type Props = {
-   onClick?: (e: React.MouseEvent<HTMLElement>) => void
-   disabled?: boolean
-   fullWidth?: boolean
-   id?: string
-   dataCy: string
-   startIcon?: ReactNode
-   sx?: SxProps<Theme>
-   color?:
-   | "inherit"
-   | "primary"
-   | "secondary"
-   | "success"
-   | "error"
-   | "info"
-   | "warning"
-}
+  onClick?: (e: MouseEvent<HTMLElement>) => void;
+  disabled?: boolean;
+  fullWidth?: boolean;
+  id?: string;
+  dataCy?: string;
+  startIcon?: ReactNode;
+  color?: ButtonColor;
+  size?: "small" | "medium" | "large";
+  sx?: SxProps<Theme>;
+};
 
-export const OutlineButton = memo(({
-   onClick,
-   children,
-   startIcon,
-   fullWidth,
-   color,
-   id,
-   disabled,
-   dataCy,
-   sx
-}: PropsWithChildren<Props>) => {
-   const onClickButton = useCallback((e: React.MouseEvent<HTMLElement>) => {
-      e.preventDefault()
-      e.stopPropagation()
-
-      onClick?.(e)
-   }, [onClick])
-
-   return (
-      <MuiButton
-         id={id}
-         sx={sx}
-         fullWidth={fullWidth}
-         disabled={disabled}
-         color={color}
-         data-cy={dataCy}
-         variant={'outlined'}
-         startIcon={startIcon}
-         onClick={onClickButton}
-      >
-         {children}
-      </MuiButton>
-   )
-})
+/** Bordered button for secondary actions such as Cancel. */
+export const OutlineButton = memo(({ dataCy, children, ...props }: PropsWithChildren<Props>) => (
+  <MuiButton {...props} type="button" variant="outlined" data-cy={dataCy}>
+    {children}
+  </MuiButton>
+));

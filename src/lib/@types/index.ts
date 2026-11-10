@@ -1,6 +1,3 @@
-// export * from './Service'
-export * from './TableType'
-
-export type LangType = {
-   [key: string]: string
-}
+export * from "./ApiType";
+export * from "./MenuType";
+export * from "./TableType";

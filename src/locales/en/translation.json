@@ -1,0 +1,86 @@
+{
+  "app": {
+    "name": "UI Starter"
+  },
+  "header": {
+    "toggleMenu": "Toggle menu",
+    "openMenu": "Open menu",
+    "breadcrumb": "Breadcrumb"
+  },
+  "sidebar": {
+    "dashboard": "Dashboard",
+    "overview": "Overview",
+    "analytics": "Analytics",
+    "main": "Main"
+  },
+  "common": {
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "remove": "Remove",
+    "save": "Save",
+    "submit": "Submit",
+    "close": "Close",
+    "tryAgain": "Try again",
+    "areYouSure": "Are you sure?",
+    "confirmRemove": "Remove {{name}}? This can't be undone.",
+    "confirmRemoveGeneric": "Remove this item? This can't be undone.",
+    "confirmSubmit": "Submit this form?",
+    "search": "Search"
+  },
+  "table": {
+    "number": "No.",
+    "showing": "Showing {{start}} to {{end}} of {{total}}",
+    "emptyTitle": "Nothing here yet",
+    "emptyDescription": "Items you add will show up in this list.",
+    "errorTitle": "Couldn't load this list",
+    "errorDescription": "Check your connection and try again.",
+    "view": "View",
+    "edit": "Edit",
+    "remove": "Remove",
+    "review": "Review"
+  },
+  "status": {
+    "all": "All statuses",
+    "available": "Available",
+    "occupied": "Occupied",
+    "reserved": "Reserved",
+    "maintenance": "Maintenance",
+    "expired": "Expired",
+    "terminated": "Terminated"
+  },
+  "overview": {
+    "title": "Overview",
+    "description_one": "{{count}} unit in this sample list.",
+    "description_other": "{{count}} units in this sample list.",
+    "units": "Units",
+    "removeUnitTitle": "Remove unit",
+    "occupancy": "Occupancy",
+    "occupied": "Occupied",
+    "ofUnits": "of {{total}} units",
+    "rentPerMonth": "{{amount}} THB rent per month",
+    "byStatus": "Units by status",
+    "filterLabel": "Filter by status",
+    "all": "All",
+    "searchPlaceholder": "Search units or tenants",
+    "noTenant": "No tenant",
+    "noMatchTitle": "No units match",
+    "noMatchDescription": "Try a different search or status.",
+    "columns": {
+      "unit": "Unit",
+      "tenant": "Tenant",
+      "rent": "Monthly rent (THB)",
+      "status": "Status",
+      "actions": "Actions"
+    }
+  },
+  "analytics": {
+    "title": "Analytics",
+    "emptyTitle": "No analytics yet",
+    "emptyDescription": "Add your charts in src/pages/AnalyticsPage.tsx."
+  },
+  "notFound": {
+    "title": "Page not found",
+    "description": "The page you're looking for doesn't exist or has moved.",
+    "back": "Back to overview"
+  }
+}

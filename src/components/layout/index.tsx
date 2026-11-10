@@ -1,67 +1,62 @@
-import { Box, styled } from "@mui/material";
-import { Fragment, useEffect, useState, type FC, type ReactNode } from "react";
-import { Outlet, useLocation } from "react-router-dom";
+import { Box, useTheme } from "@mui/material";
+import { useEffect, useState } from "react";
+import { Outlet } from "react-router-dom";
 import { useWindowSize } from "../../lib/hooks/useWindowSize";
+import { Header } from "../common/Header";
 import { Sidebar } from "../common/Sidebar";
 
 type Props = {
-  children?: ReactNode;
+  /** Set to false for pages without navigation, e.g. a login page */
   isShowSidebar?: boolean;
 };
 
-const Main = styled("main", {
-  shouldForwardProp: (prop) => prop !== "isMobile",
-})<{
-  isMobile?: boolean;
-}>(({ theme, isMobile }) => ({
-  flexGrow: 1,
-  marginTop: 64,
-  width: isMobile ? "100%" : `calc(100% - ${320}px)`,
-  backgroundColor: "#F4F7FA",
-  transition: theme.transitions.create("margin", {
-    easing: theme.transitions.easing.sharp,
-    duration: theme.transitions.duration.leavingScreen,
-  }),
-}));
-
-const MainWrapper = styled(Box, {
-  shouldForwardProp: (prop) => prop !== "isMobile",
-})<{
-  isMobile?: boolean;
-}>(({ isMobile }) => ({
-  padding: 24,
-  paddingBottom: isMobile ? 284 : 20,
-}));
-
-const MainLayout: FC<{
-  isMobile: boolean;
-  children: ReactNode;
-}> = ({ isMobile, children }) => {
-  const [isShowPadding, setIsShowPadding] = useState(false);
-  const location = useLocation();
-
-  useEffect(() => {
-    setIsShowPadding(false);
-  }, [location.pathname]);
-
-  return (
-    <MainWrapper isMobile={isMobile && isShowPadding}>{children}</MainWrapper>
-  );
-};
-
+/** App shell: fixed header, collapsible sidebar and the routed page. */
 export const Layout = ({ isShowSidebar = true }: Props) => {
+  const theme = useTheme();
   const { isMobile } = useWindowSize();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(!isMobile);
+
+  // Desktop starts open, mobile starts closed — also when the window crosses the breakpoint.
+  useEffect(() => {
+    setIsSidebarOpen(!isMobile);
+  }, [isMobile]);
+
+  const hasDesktopSidebar = isShowSidebar && !isMobile && isSidebarOpen;
+  const sidebarWidth = theme.tokens.layout.sidebarWidth;
 
   return (
-    <Fragment>
-      <Box display={"flex"} minHeight={"100vh"}>
-        <Sidebar isShowSidebar={isShowSidebar} />
-        <Main isMobile={isMobile}>
-          <MainLayout isMobile={isMobile}>
-            <Outlet />
-          </MainLayout>
-        </Main>
+    <Box minHeight="100vh">
+      <Header
+        isMobile={isMobile}
+        offset={hasDesktopSidebar ? sidebarWidth : 0}
+        showMenuButton={isShowSidebar}
+        isMenuOpen={isSidebarOpen}
+        onToggleMenu={() => setIsSidebarOpen((open) => !open)}
+      />
+      {isShowSidebar && (
+        <Sidebar open={isSidebarOpen} isMobile={isMobile} onClose={() => setIsSidebarOpen(false)} />
+      )}
+      <Box
+        component="main"
+        sx={{
+          pt: `${theme.tokens.layout.headerHeight}px`,
+          ml: hasDesktopSidebar ? `${sidebarWidth}px` : 0,
+          transition: theme.transitions.create("margin-left", {
+            duration: theme.transitions.duration.shorter,
+          }),
+        }}
+      >
+        <Box
+          sx={{
+            maxWidth: theme.tokens.layout.contentMaxWidth,
+            px: { xs: 2, md: 3, lg: 5 },
+            pt: { xs: 3, lg: 5 },
+            pb: 7,
+          }}
+        >
+          <Outlet />
+        </Box>
       </Box>
-    </Fragment>
+    </Box>
   );
 };

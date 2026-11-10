@@ -1,46 +1,33 @@
 export enum DataType {
-   Text,
-   Component,
-   Action,
-   Status,
+  Text,
+  Component,
+  Action,
+  Status,
 }
 
 export type Column = {
-   id: string;
-   label?: string;
-   dataType: DataType;
-   minWidth?: number;
-   align?: 'right' | 'left' | 'center';
-   format?: (value: number) => string;
-   canSort?: boolean;
-   truncate?: boolean;
-   enablePinning?: boolean;
-   piningSide?: "left" | "right";
-}
+  /** Key of the row object this column reads */
+  id: string;
+  label?: string;
+  dataType: DataType;
+  minWidth?: number;
+  align?: "right" | "left" | "center";
+  /** Formats numeric values of a Text column */
+  format?: (value: number) => string;
+  /** Cut long text with an ellipsis (needs minWidth) */
+  truncate?: boolean;
+};
 
 export type PagingState = {
-   keyword?: string
-   limit: number
-   page: number
-   offset: number
-}
+  keyword?: string;
+  limit: number;
+  page: number;
+  offset: number;
+};
 
 export type TableState<T> = {
-   rows: T[],
-   total: number
-}
+  rows: T[];
+  total: number;
+};
 
-export type Order = 'asc' | 'desc';
-
-export type HeaderColumn = {
-   label: string
-   minWidth?: number
-   align?: "right" | "center"
-   format?: ((value: number) => string)
-   canSort?: boolean
-   truncate?: boolean
-   rowSpan?: number
-   colSpan?: number
-   enablePinning?: boolean
-   pinnigSide?: "left" | "right"
-}
+export type Order = "asc" | "desc";
